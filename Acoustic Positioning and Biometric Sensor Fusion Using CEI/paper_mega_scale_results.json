@@ -1,0 +1,190 @@
+{
+  "24": {
+    "cei": {
+      "allocator": "cei",
+      "N": 24,
+      "n_slots": 200,
+      "oscillations": 53,
+      "governance_violations": 0,
+      "governance_compliance_pct": 100.0,
+      "waste_pct": 25.7,
+      "final_weights": [
+        0.299146337236629,
+        0.2844248282514728,
+        0.4164288345118981
+      ],
+      "n_weight_updates": 201,
+      "wall_clock_s": 0.37
+    },
+    "reactive": {
+      "allocator": "reactive",
+      "N": 24,
+      "n_slots": 200,
+      "oscillations": 2015,
+      "governance_violations": 1113,
+      "governance_compliance_pct": 76.81,
+      "waste_pct": 13.78,
+      "final_weights": null,
+      "n_weight_updates": 0,
+      "wall_clock_s": 0.37
+    },
+    "static": {
+      "allocator": "static",
+      "N": 24,
+      "n_slots": 200,
+      "oscillations": 24,
+      "governance_violations": 0,
+      "governance_compliance_pct": 100.0,
+      "waste_pct": 34.99,
+      "final_weights": null,
+      "n_weight_updates": 0,
+      "wall_clock_s": 0.42
+    },
+    "scoring_time_s": 0.004,
+    "edges": 48,
+    "mean_degree": 4.0,
+    "osc_reduction_vs_reactive_pct": 97.37,
+    "waste_reduction_vs_reactive_pct": -86.5
+  },
+  "64": {
+    "cei": {
+      "allocator": "cei",
+      "N": 64,
+      "n_slots": 200,
+      "oscillations": 110,
+      "governance_violations": 0,
+      "governance_compliance_pct": 100.0,
+      "waste_pct": 25.14,
+      "final_weights": [
+        0.299146337236629,
+        0.2844248282514728,
+        0.4164288345118981
+      ],
+      "n_weight_updates": 201,
+      "wall_clock_s": 0.94
+    },
+    "reactive": {
+      "allocator": "reactive",
+      "N": 64,
+      "n_slots": 200,
+      "oscillations": 5486,
+      "governance_violations": 3387,
+      "governance_compliance_pct": 73.54,
+      "waste_pct": 13.91,
+      "final_weights": null,
+      "n_weight_updates": 0,
+      "wall_clock_s": 0.94
+    },
+    "static": {
+      "allocator": "static",
+      "N": 64,
+      "n_slots": 200,
+      "oscillations": 64,
+      "governance_violations": 0,
+      "governance_compliance_pct": 100.0,
+      "waste_pct": 34.94,
+      "final_weights": null,
+      "n_weight_updates": 0,
+      "wall_clock_s": 0.93
+    },
+    "scoring_time_s": 0.008,
+    "edges": 192,
+    "mean_degree": 6.0,
+    "osc_reduction_vs_reactive_pct": 97.99,
+    "waste_reduction_vs_reactive_pct": -80.73
+  },
+  "256": {
+    "cei": {
+      "allocator": "cei",
+      "N": 256,
+      "n_slots": 200,
+      "oscillations": 435,
+      "governance_violations": 0,
+      "governance_compliance_pct": 100.0,
+      "waste_pct": 20.97,
+      "final_weights": [
+        0.299146337236629,
+        0.2844248282514728,
+        0.4164288345118981
+      ],
+      "n_weight_updates": 201,
+      "wall_clock_s": 3.76
+    },
+    "reactive": {
+      "allocator": "reactive",
+      "N": 256,
+      "n_slots": 200,
+      "oscillations": 21909,
+      "governance_violations": 13249,
+      "governance_compliance_pct": 74.12,
+      "waste_pct": 14.0,
+      "final_weights": null,
+      "n_weight_updates": 0,
+      "wall_clock_s": 3.8
+    },
+    "static": {
+      "allocator": "static",
+      "N": 256,
+      "n_slots": 200,
+      "oscillations": 256,
+      "governance_violations": 0,
+      "governance_compliance_pct": 100.0,
+      "waste_pct": 34.8,
+      "final_weights": null,
+      "n_weight_updates": 0,
+      "wall_clock_s": 3.77
+    },
+    "scoring_time_s": 0.04,
+    "edges": 1024,
+    "mean_degree": 8.0,
+    "osc_reduction_vs_reactive_pct": 98.01,
+    "waste_reduction_vs_reactive_pct": -49.79
+  },
+  "1024": {
+    "cei": {
+      "allocator": "cei",
+      "N": 1024,
+      "n_slots": 200,
+      "oscillations": 1768,
+      "governance_violations": 0,
+      "governance_compliance_pct": 100.0,
+      "waste_pct": 17.87,
+      "final_weights": [
+        0.299146337236629,
+        0.2844248282514728,
+        0.4164288345118981
+      ],
+      "n_weight_updates": 201,
+      "wall_clock_s": 15.62
+    },
+    "reactive": {
+      "allocator": "reactive",
+      "N": 1024,
+      "n_slots": 200,
+      "oscillations": 88107,
+      "governance_violations": 50610,
+      "governance_compliance_pct": 75.29,
+      "waste_pct": 13.91,
+      "final_weights": null,
+      "n_weight_updates": 0,
+      "wall_clock_s": 15.36
+    },
+    "static": {
+      "allocator": "static",
+      "N": 1024,
+      "n_slots": 200,
+      "oscillations": 1024,
+      "governance_violations": 0,
+      "governance_compliance_pct": 100.0,
+      "waste_pct": 34.8,
+      "final_weights": null,
+      "n_weight_updates": 0,
+      "wall_clock_s": 15.16
+    },
+    "scoring_time_s": 0.198,
+    "edges": 5120,
+    "mean_degree": 10.0,
+    "osc_reduction_vs_reactive_pct": 97.99,
+    "waste_reduction_vs_reactive_pct": -28.47
+  }
+}

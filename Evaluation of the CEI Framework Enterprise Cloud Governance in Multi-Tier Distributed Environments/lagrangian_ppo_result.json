@@ -1,0 +1,14 @@
+{
+  "name": "lagrangian_ppo",
+  "monthly_cost_usd": 2499.338134765625,
+  "cost_reduction_pct": 88.6393721147017,
+  "oscillation_events": 60,
+  "oscillation_reduction_pct": 0.0,
+  "utilization_efficiency_pct": 99.73116425988975,
+  "governance_violations": 21060,
+  "governance_compliance_pct": 2.500000000000002,
+  "waste_pct": 0.26883574011025146,
+  "training_seconds": 65.62794542312622,
+  "timesteps": 60000,
+  "final_lambda": 10.260000000000007
+}

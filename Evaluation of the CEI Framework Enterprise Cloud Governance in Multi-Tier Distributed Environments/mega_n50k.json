@@ -1,0 +1,14 @@
+{
+  "N": 50000,
+  "E": 499900,
+  "mean_degree": 20.0,
+  "graph_build_s": 1.126,
+  "betweenness_s": 40.041,
+  "betweenness_k_samples": 78,
+  "pagerank_s": 0.888,
+  "centrality_total_s": 40.929,
+  "per_step_entropy_ms": 6.69,
+  "per_step_cei_score_ms": 18.47,
+  "per_step_total_ms": 25.16,
+  "sparse_adj_memory_mb": 15.64
+}

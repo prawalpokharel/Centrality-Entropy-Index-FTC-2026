@@ -1,0 +1,156 @@
+{
+  "incident_id": "AWS-ME-MAR-2026",
+  "incident_name": "March 2026 Iranian Drone Strikes on AWS Gulf Data Centers",
+  "event_start_utc": "2026-03-01T12:30:00Z",
+  "event_start_pst": "2026-03-01T04:30:00-08:00",
+  "event_start_gulf": "2026-03-01T16:30:00+04:00",
+  "event_type": "kinetic_adversarial",
+  "trigger": "Iranian Shahed one-way attack drones",
+  "attribution": "Iran Islamic Revolutionary Guard Corps Aerospace Force",
+  "first_known_military_strike_on_hyperscaler": true,
+  "regions_affected": {
+    "me-central-1": {
+      "country": "UAE",
+      "total_availability_zones": 3,
+      "azs_affected": ["mec1-az2", "mec1-az3"],
+      "az_impact_pattern": "AZ-to-AZ cascade",
+      "physical_damage": "two facilities directly struck; fire, power cut, water damage from fire suppression",
+      "services_impacted_total": 91,
+      "tier1_disrupted_count": 9,
+      "tier1_disrupted_services": [
+        "EC2 (Networking APIs, AssociateAddress 500s)",
+        "EBS (mec1-az2/az3 volumes inaccessible)",
+        "S3 (high failure rates ingest/egress)",
+        "Lambda (function invocations failing)",
+        "Management Console (partial only)",
+        "CLI (partial only)"
+      ],
+      "tier2_degraded_count": 24,
+      "tier2_degraded_services": [
+        "RDS (connection failures)",
+        "DynamoDB (elevated error rates)",
+        "Cognito (authentication degraded)",
+        "EKS (cluster management impaired)",
+        "VPC (networking disrupted)"
+      ],
+      "tier3_impacted_count": 58,
+      "tier3_impacted_services_sample": [
+        "CloudFormation",
+        "Route53",
+        "CloudWatch",
+        "Kinesis",
+        "WAF",
+        "SNS",
+        "SQS"
+      ]
+    },
+    "me-south-1": {
+      "country": "Bahrain",
+      "total_availability_zones": 3,
+      "azs_affected": ["mes1-az1"],
+      "az_impact_pattern": "single AZ initially; broader regional impact within 17 hours",
+      "physical_damage": "drone strike in close proximity caused physical impacts; power and water shortages",
+      "services_impacted_total": 46,
+      "services_impacted_sample": [
+        "EC2",
+        "RDS",
+        "CloudFormation",
+        "WAF"
+      ]
+    }
+  },
+  "timeline_relative_hours": [
+    {"t_hours": 0.0,   "timestamp_pst": "2026-03-01T04:30 PST", "event": "mec1-az2 struck by drone", "impact_class": "kinetic_strike", "phase": "T1_disruption_begin"},
+    {"t_hours": 1.65,  "timestamp_pst": "2026-03-01T06:09 PST", "event": "AWS confirms mec1-az2 power failure", "impact_class": "official_acknowledgment", "phase": "T1_disruption_confirmed"},
+    {"t_hours": 7.0,   "timestamp_pst": "2026-03-01T11:30 PST", "event": "mec1-az3 cascades", "impact_class": "intra_region_cascade", "phase": "T2_intra_region_propagation"},
+    {"t_hours": 17.43, "timestamp_pst": "2026-03-01T21:56 PST", "event": "ME-SOUTH-1 (Bahrain) impacted", "impact_class": "cross_region_cascade", "phase": "T3_cross_region_propagation"},
+    {"t_hours": 35.82, "timestamp_pst": "2026-03-02T16:19 PST", "event": "AWS publicly confirms drone strike attribution", "impact_class": "attribution_disclosure", "phase": "ongoing_response"},
+    {"t_hours": 51.73, "timestamp_pst": "2026-03-03T08:14 PST", "event": "S3 PUT/LIST partial recovery via software mitigation", "impact_class": "software_mitigated_recovery_begin", "phase": "partial_recovery"},
+    {"t_hours": 168.0, "timestamp_pst": "2026-03-08T04:30 PST", "event": "estimated multi-day physical recovery complete", "impact_class": "physical_recovery_complete", "phase": "full_recovery"}
+  ],
+  "cascade_pattern": {
+    "intra_region_propagation_hours": 7.0,
+    "intra_region_propagation_description": "mec1-az2 (kinetic) -> mec1-az3 (power/networking dependency)",
+    "cross_region_propagation_hours": 17.43,
+    "cross_region_propagation_description": "me-central-1 -> me-south-1 via shared dependencies and overload migration",
+    "control_plane_failure_first": true,
+    "control_plane_failure_description": "IAM and CloudFormation degraded before data-plane services (EC2 launch, S3 reads)",
+    "blast_radius_classification": "regional then cross-regional within 24 hours"
+  },
+  "recovery_profile": {
+    "software_mitigation_partial_recovery_hours": 51.73,
+    "software_mitigation_description": "S3 PUT/LIST restored via degraded-mode software updates while physical infrastructure remained damaged",
+    "physical_recovery_hours_estimate": 168.0,
+    "physical_recovery_description": "multi-day physical repair of damaged facilities",
+    "parallel_recovery_tracks": true,
+    "recovery_strategy": "parallel physical restoration + software-based mitigation enabling partial service in degraded infrastructure"
+  },
+  "downstream_impact_examples": {
+    "consumer_facing": [
+      "Careem (ride-hailing, delivery) - service disruption",
+      "Alaan (payments) - service disruption",
+      "Hubpay (payments) - service disruption"
+    ],
+    "enterprise_saas": [
+      "Snowflake (data management) - regional disruption attributed to AWS UAE outage"
+    ],
+    "sector_impact": [
+      "Banking and payments across UAE and Bahrain",
+      "Delivery and consumer applications",
+      "Enterprise SaaS platforms with Gulf region dependencies"
+    ]
+  },
+  "second_incident_april_2026": {
+    "date": "2026-04-01",
+    "location": "AWS Bahrain facility",
+    "trigger": "Iranian drone strike",
+    "note": "Subsequent strike on AWS Bahrain after initial March 1 event"
+  },
+  "data_sources": [
+    {
+      "label": "AWS Post-Event Summaries archive",
+      "url": "https://aws.amazon.com/premiumsupport/technology/pes/"
+    },
+    {
+      "label": "AWS Status Page update 12:19 AM UTC March 2",
+      "url": "https://www.theregister.com/2026/03/02/amazon_outages_middle_east/"
+    },
+    {
+      "label": "Data Center Knowledge - service impact list",
+      "url": "https://www.datacenterknowledge.com/outages/aws-middle-east-outage-after-data-center-hit-by-unidentified-objects"
+    },
+    {
+      "label": "Cybersecurity News - 109 services disrupted detailed timeline",
+      "url": "https://cybersecuritynews.com/aws-middle-east-services-disrupted/"
+    },
+    {
+      "label": "Medium analysis with Health Dashboard tier breakdown",
+      "url": "https://medium.com/@ismailkovvuru/aws-uae-drone-strike-outage-disaster-recovery-lessons-every-cloud-architect-needs-now-6b4d9c57b694"
+    },
+    {
+      "label": "The Conversation - academic context",
+      "url": "https://theconversation.com/why-iran-targeted-amazon-data-centers-and-what-that-does-and-doesnt-change-about-warfare-278642"
+    },
+    {
+      "label": "Rest of World - industry impact",
+      "url": "https://restofworld.org/2026/iran-amazon-data-center-strikes/"
+    }
+  ],
+  "calibration_use_for_paper1": {
+    "framing": "publicly reported AWS Health Dashboard incident data, not live API telemetry",
+    "parameters_calibrated": [
+      "service tier distribution (9/24/58 in me-central-1)",
+      "intra-region cascade timing (7 hours)",
+      "cross-region cascade timing (17.4 hours)",
+      "control-plane-first failure ordering",
+      "multi-day physical recovery with hours-scale software-mitigated partial recovery"
+    ],
+    "what_is_not_claimed": [
+      "minute-by-minute telemetry replay",
+      "live API integration",
+      "access to AWS internal logs",
+      "ability to reproduce exact service-level metrics"
+    ],
+    "honesty_note": "This profile parameterizes simulation against the publicly reported topology and timing of a real event. It does not replay proprietary telemetry."
+  }
+}

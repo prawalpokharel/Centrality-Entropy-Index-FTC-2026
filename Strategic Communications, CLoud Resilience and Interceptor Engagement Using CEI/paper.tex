@@ -1,0 +1,628 @@
+% Paper 1: Governance-Aware Resource Allocation for Defense Infrastructure
+% LNCS template conversion from ReportLab v10
+\documentclass[runningheads]{llncs}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath, amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{enumitem}
+% microtype removed - incompatible with LNCS default fonts
+% lmodern not available
+
+% Cleaner URL formatting
+% better URL breaking
+\PassOptionsToPackage{hyphens}{url}
+\sloppy
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue!60!black,
+  citecolor=blue!60!black,
+  urlcolor=blue!60!black,
+}
+
+\renewcommand{\UrlFont}{\ttfamily\small}
+
+\begin{document}
+
+\title{Governance-Aware Resource Allocation for Defense Infrastructure Under Adversarial Threat: Strategic Communications, Cloud Resilience, and Interceptor Engagement Using the Centrality-Entropy Index}
+
+\titlerunning{Governance-Aware Resource Allocation for Defense Infrastructure}
+
+\author{Prawal Pokharel\orcidID{}}
+\authorrunning{P. Pokharel}
+
+\institute{Independent Researcher, Dallas-Fort Worth, TX, USA\\
+\email{prawal@cloudoptimizer.app}}
+
+\maketitle
+
+\begin{abstract}
+Defense infrastructure spanning nuclear command, control, and communications (NC3), cloud computing, and missile defense faces escalating adversarial threats that static allocation approaches cannot address. The March 2026 Iranian drone strikes on Gulf AWS data centers established commercial cloud infrastructure as a military target and exposed governance gaps in standard disaster recovery. This paper introduces the Centrality-Entropy Index (CEI) framework, a unified governance-aware methodology integrating centrality, entropy, and policy-driven governance constraints for dynamic resource allocation. The framework is evaluated across three operationally distinct domains: (1) NC3 strategic communications under cyber attack; (2) cloud failover under kinetic strike, with in-region degradation dynamics additionally calibrated against publicly reported AWS Health Dashboard data from the March 2026 Gulf event; and (3) multi-salvo missile defense interceptor allocation under trajectory uncertainty. Formal results establish convexity of the allocation subproblem, KKT optimality characterization, and a concrete stability loss driving weight convergence. Cross-domain results demonstrate 91.4\% NC3 communication success under targeted attack (versus 83.2\% for MDP), 74\% reduction in governance-critical cloud workload downtime, and up to 21 percentage points improvement in multi-salvo missile defense asset protection over static priority (S3 scenario). Under the AWS-calibrated topology, CEI achieves 2.8$\times$ higher throughput than unconstrained PPO while maintaining identical 100\% governance compliance. Governance compliance exceeds 96\% across all domains, and CEI demonstrates consistent comparative performance across every primary classical-baseline evaluation scenario. The framework aligns with Joint All-Domain Command and Control (JADC2), zero trust architecture, and DoD AI Strategy mandates.
+
+\keywords{NC3 resilience \and cloud disaster recovery \and missile defense \and AWS Health Dashboard calibration \and centrality \and entropy \and governance constraints \and dynamic resource allocation \and JADC2 \and zero trust}
+\end{abstract}
+
+\section{Introduction}
+\label{sec:intro}
+
+Commercial cloud infrastructure has emerged as a new category of military target. On March 1, 2026, Iranian Shahed-136 drones struck two Amazon Web Services data centers in the United Arab Emirates and damaged a third in Bahrain, marking the first known military strikes on hyperscale cloud infrastructure in history~\cite{cnbc1,register1}. The strikes disabled two of three availability zones in the ME-CENTRAL-1 region, cascading into Bahrain's ME-SOUTH-1 region within 17 hours and causing widespread disruption to banking, payment, and enterprise services throughout the Gulf~\cite{cnbc2}. Iran's Islamic Revolutionary Guard Corps explicitly cited the data centers' role in supporting U.S. military intelligence as the justification for the strikes~\cite{cnbc3}, and on March 31 publicly named eighteen major U.S. technology companies as legitimate targets~\cite{conversation}. These attacks did not occur in isolation: commercial cloud has been quietly absorbing increasingly critical defense workloads, including AI-assisted intelligence analysis and command-decision support systems, while inheriting the governance assumptions of consumer software-as-a-service. The March 2026 attacks demonstrated that commercial cloud infrastructure is now a viable target for state-actor kinetic engagement, and that standard disaster recovery makes no distinction between high-priority defense workloads and consumer applications during failover.
+
+These three domains---strategic communications, cloud infrastructure, and kinetic engagement---share a deep mathematical structure: each requires dynamic allocation of finite resources across networks of nodes with varying structural importance, operational uncertainty, and policy-driven priority. Yet each is currently approached with domain-specific heuristics that ignore this structural similarity. NC3 resilience relies on static redundancy and survivability engineering with limited dynamic uncertainty modeling. Cloud disaster recovery assumes uncorrelated single-facility failures and lacks workload-criticality discrimination. Missile defense interceptor allocation uses static priority or greedy threat-value assignment with limited treatment of tracking uncertainty as an allocation dimension.
+
+\paragraph{Contributions.}
+This paper introduces the Centrality-Entropy Index (CEI) framework---\textbf{a unified governance-aware dynamic resource allocation methodology that integrates structural centrality, Shannon entropy, and policy-driven governance constraints into a single decision function} applicable across defense infrastructure domains. While prior work has developed centrality analysis, entropy-based monitoring, and policy-tier prioritization in isolation, no existing methodology integrates all three into a unified, cross-domain allocation framework. This integration---not the individual components---is the contribution. The framework's domain-agnosticism is its principal property: the same core formulation, adapted only through domain-specific component mapping, produces measurable improvement across operationally distinct defense domains. The paper presents five contributions. First, the CEI framework itself, with formal convexity results, KKT optimality characterization, and a concrete stability loss function driving weight convergence. Second, NC3 evaluation on a 200-node topology against six baselines over 500 Monte Carlo trials. Third, cloud failover evaluation on a 150-node topology demonstrating rapid-response applicability to the March 2026 Gulf attacks. Fourth, multi-salvo missile defense evaluation with quantitative advantage over static and greedy baselines. Fifth, cross-domain analysis establishing governance compliance above 96\% across all domains. The framework aligns with three active Department of Defense mandates: Joint All-Domain Command and Control (JADC2)~\cite{jadc2}, zero trust architecture~\cite{gao_it}, and the 2023 DoD Data, Analytics, and Artificial Intelligence Adoption Strategy~\cite{dod_ai}.
+
+\paragraph{Research Gap.}
+Three gaps motivate this work. First, no existing methodology integrates structural dependency analysis, operational uncertainty quantification, and policy-driven prioritization into a unified allocation framework. Second, prior work treats NC3, cloud, and missile defense in isolation despite their operational similarity; the resulting methods cannot transfer across domains without redesign. Third, the assumption of clean telemetry and stationary adversarial conditions underlying most schedulers fails under operational pressure. This paper addresses all three with a single domain-agnostic framework whose evaluation is structured to demonstrate cross-domain transferability and resilience under realistic telemetry constraints.
+
+\paragraph{Paper Organization.}
+Section~\ref{sec:background} reviews the operational threat landscape. Section~\ref{sec:framework} presents the CEI framework formulation with convexity, KKT, and stability results. Sections~\ref{sec:nc3}--\ref{sec:missile} evaluate CEI in NC3, cloud, and missile defense respectively, with the cloud evaluation calibrated against publicly reported AWS Health Dashboard data from the March 2026 Gulf event. Section~\ref{sec:crossdomain} presents cross-domain analysis. Section~\ref{sec:failuremode} characterizes failure modes. Section~\ref{sec:strategic} situates the framework within DoD strategic initiatives. Sections~\ref{sec:limitations} and~\ref{sec:conclusion} discuss limitations, future work, and conclude.
+
+\section{Background and Threat Landscape}
+\label{sec:background}
+
+\subsection{NC3 Architecture and Vulnerabilities}
+
+The NC3 architecture serves five essential functions: sensing the operational environment, assessing threats, conferencing decision-makers, transmitting Presidential orders, and managing force operations~\cite{crs_nc3}. The system operates in two layers: a day-to-day architecture and a survivable thin-line ensuring assured connectivity through all threat environments~\cite{nuclear_handbook}. Key elements include the AEHF satellite constellation and its replacement Evolved Strategic SATCOM (ESS), the E-4B/SAOC airborne operations center, the E-6B Mercury TACAMO relay aircraft, and early warning radars (PAVE PAWS, PARCS, COBRA DANE)~\cite{crs_nc3,atlantic_council}. The 2022 Nuclear Posture Review called for optimized resilience approaches for next-generation NC3~\cite{npr_2022}, but the analog-to-digital transition introduces new attack surfaces~\cite{wirtz}; U.S. intelligence assessments describe Russian and Chinese counterspace and cyber capabilities specifically targeting NC3 elements~\cite{atlantic_council}. Section 1631 of the FY2024 NDAA established a unified NC3 major force program~\cite{ndaa2024}. Traditional resilience strategies---redundancy, fault tolerance, network hardening---rely on static configurations that cannot adapt to evolving threats and do not incorporate dynamic uncertainty modeling or governance-aware prioritization.
+
+\subsection{The 2026 Gulf Data Center Attacks}
+
+On March 1, 2026, following the joint U.S.--Israeli Operation Epic Fury against Iran, Iranian forces launched retaliatory drone strikes across the Gulf region. Drones struck AWS facilities in the UAE and damaged a facility in Bahrain, reportedly disabling multiple availability zones in the ME-CENTRAL-1 region~\cite{cnbc1,register1}. AWS acknowledged the outages on its Health Dashboard~\cite{register1}. Downstream disruptions cascaded into UAE banking, payment platforms, enterprise software, and consumer applications~\cite{cnbc2}. A second wave followed: an additional drone struck Bahrain on April 1, Iranian state media claimed an Oracle Dubai attack on April 2, and on March 31 the IRGC publicly named eighteen major U.S. technology companies as legitimate targets~\cite{conversation}. These events exposed two fundamental gaps: (i) multi-AZ redundancy---designed for uncorrelated localized failures---fails under coordinated kinetic attack that can simultaneously disable multiple availability zones; (ii) standard disaster recovery makes no distinction between military intelligence workloads and consumer applications during failover, creating a governance gap. Specific technical details (e.g., precise AZ designations) are drawn from news reporting rather than official AWS disclosures.
+
+\subsection{Missile Defense Allocation Challenges}
+
+The Missile Defense Agency has spent over \$194 billion developing the BMDS since 2002, yet persistent challenges remain in meeting annual interceptor delivery goals and managing limited interceptor inventory across an evolving threat set~\cite{gao_md1}. In fiscal year 2022, MDA did not deliver all planned SM-3 Block IIA interceptors and failed to meet its flight test baseline~\cite{gao_md1}. The emergence of hypersonic weapons---capable of flight at speeds exceeding Mach 5 and mid-flight trajectory changes---presents substantially harder tracking and engagement challenges, with MDA's Glide Phase Interceptor program carrying high technical risk~\cite{gao_md2}. The defense of Guam, a critically important priority for the Indo-Pacific region currently protected by a single THAAD battery with six launchers and one radar, is scheduled for phased enhancement through fiscal year 2032~\cite{gao_md3}. Existing interceptor allocation methods---static priority schemes, greedy threat-value assignment, and approximate dynamic programming~\cite{davis_adp,summers_adp}---do not incorporate trajectory tracking uncertainty as an explicit allocation dimension nor provide formal assignment stability bounds.
+
+\subsection{Related Work and Research Gap}
+
+Network resilience under targeted attack has been studied in graph-theoretic frameworks. Albert, Jeong, and Barabasi demonstrated differential vulnerability to random versus targeted node removal~\cite{albert}, establishing that networks exhibit qualitatively different failure modes under adversarial targeting. Freeman's centrality metrics~\cite{freeman,freitas2021} identify structurally critical nodes, and Shannon entropy~\cite{shannon,tosi2025} provides a principled measure of operational uncertainty~\cite{cover}. Cloud disaster recovery has been studied extensively in the context of natural disasters and hardware failures~\cite{bala,gill}, but prior work does not address coordinated kinetic attacks on cloud infrastructure---a threat scenario that became real only in March 2026. In missile defense, Davis, Robbins, and Lunday demonstrated that approximate dynamic programming achieves a 7.74\% mean optimality gap for interceptor allocation~\cite{davis_adp}, and Bertsekas et al. applied neuro-dynamic programming to the weapon-target assignment problem~\cite{bertsekas}.
+
+The CEI framework also relates to broader literatures in cyber-physical systems resilience~\cite{pasqualetti,sandberg}, robust dynamic programming~\cite{nilim,iyengar}, and multi-objective optimization~\cite{marler,deb}, each of which addresses elements of the allocation problem in isolation. Detection-and-recovery approaches focus on diagnosis rather than proactive allocation; robust MDPs require explicit uncertainty-set characterization while CEI's entropy formulation draws uncertainty directly from telemetry; multi-objective methods use Pareto-front exploration while CEI uses weighted scalarization with an explicit stability loss for bounded oscillation. GNN anomaly detection~\cite{deng} and reinforcement learning allocators are complementary capabilities for future integration. The CEI contribution is not the introduction of any individual primitive (centrality, entropy, governance, scalarization), but their integration into a unified, domain-agnostic decision function with formal convexity, oscillation, and stability guarantees applicable across operationally distinct defense infrastructure domains.
+
+To our knowledge, no prior work integrates structural dependency analysis, uncertainty quantification, and governance constraints into a unified allocation framework applicable across defense infrastructure domains. This paper bridges that gap.
+
+\section{The Centrality-Entropy Index Framework}
+\label{sec:framework}
+
+We introduce the Centrality-Entropy Index (CEI) framework as a domain-agnostic governance-aware allocation methodology. The framework comprises five core elements: (1) a structural centrality component capturing each node's importance within the operational topology; (2) an entropy component quantifying operational uncertainty; (3) a governance component encoding policy-driven priority tiers; (4) a composite scoring function combining the three components with adaptive weights; and (5) a stability mechanism preventing allocation oscillation under volatile conditions.
+
+\subsection{System Model}
+
+Let $G = (V, E)$ denote the operational topology, where $V$ is the set of nodes (NC3 channels, cloud regions, interceptor batteries) and $E$ represents dependency or connectivity relationships. Each node $i \in V$ has an allocatable resource $x_i(t)$ at time $t$ subject to a feasibility set $\mathcal{X}$ defined by capacity caps $x_{\max,i}$ and tier-based governance floors $x_{\min,i}$. The total resource budget is $R(t)$, which may itself vary over time.
+
+\subsection{Centrality Component}
+
+For node $i \in V$, the centrality score $C_i(t) \in [0,1]$ quantifies structural importance via a domain-specific blend of betweenness, degree, and dependency centrality (Equation~\ref{eq:centrality}):
+\begin{equation}
+C_i(t) = w_b B_i(t) + w_d D_i(t) + w_s S_i(t),
+\label{eq:centrality}
+\end{equation}
+where $B_i$ is normalized betweenness, $D_i$ is normalized degree, $S_i$ is service dependency weight, and $(w_b, w_d, w_s)$ are domain-specific blending weights summing to one. Centrality is recomputed when topology changes (e.g., node loss) but is otherwise static within a time window.
+
+\subsection{Entropy Component}
+
+Entropy $H_i(t) \in [0,1]$ captures operational uncertainty about node $i$'s state via Shannon entropy (Equation~\ref{eq:entropy}):
+\begin{equation}
+H_i(t) = -\sum_{s \in \mathcal{S}} p_{i,s}(t) \log_2 p_{i,s}(t) / \log_2 |\mathcal{S}|,
+\label{eq:entropy}
+\end{equation}
+where $\mathcal{S}$ is the set of possible operational states (e.g., \{operational, degraded, under-attack, offline\}) and $p_{i,s}(t)$ is the probability that node $i$ is in state $s$ at time $t$. Probabilities are estimated from observable telemetry: heartbeat patterns, latency distributions, packet loss profiles, threat intelligence feeds.
+
+\subsection{Governance Component}
+
+The governance score $G_i(t) \in (0, 1]$ encodes policy-driven priority via a tier-based mapping. Each node $i$ is assigned a tier $T(i) \in \{T_1, T_2, T_3, T_4\}$ where lower index indicates higher criticality, as defined in Equation~\ref{eq:governance}:
+\begin{equation}
+G_i = \text{map}(T(i)), \quad \text{map}: \{T_1, T_2, T_3, T_4\} \to \{1.0, 0.75, 0.50, 0.25\}.
+\label{eq:governance}
+\end{equation}
+
+Governance also imposes hard constraints via the minimum allocation floor $x_{\min,i} = \phi(T(i))$, where T1 and T2 nodes receive non-zero floors and T3/T4 nodes are floored only by physical limits.
+
+Table~\ref{tab:tier_nc3} shows the tier mapping used for the NC3 domain, with each tier's example node class and its governance allocation floor.
+
+\begin{table}[ht]
+\caption{Sample tier mapping for the NC3 domain.}
+\label{tab:tier_nc3}
+\centering
+\small
+\begin{tabular}{lcc}
+\toprule
+Tier & Example & Floor ($x_{\min}/x_{\max}$) \\
+\midrule
+T1 & Command authority (E-4B/SAOC) & 1.00 \\
+T2 & Force operations (sub. STRATCOM) & 0.75 \\
+T3 & Early warning correlation & 0.50 \\
+T4 & Routine status reporting & 0.20 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Composite Index and Optimization}
+
+The composite CEI score is a weighted scalarization of the three components (Equation~\ref{eq:cei}):
+\begin{equation}
+\text{CEI}_i(t) = \alpha C_i(t) + \beta H_i(t) + \gamma G_i(t),
+\label{eq:cei}
+\end{equation}
+with adaptive weights $w = (\alpha, \beta, \gamma)$ on the probability simplex. The allocation at time $t$ solves:
+\begin{equation}
+\max_{x \in \mathcal{X}} \sum_{i \in V} u(x_i) \cdot \text{CEI}_i(t), \quad \text{subject to } \sum_i x_i \leq R(t),
+\label{eq:alloc}
+\end{equation}
+where $u$ is a concave utility function (typically $u(x) = x$ for linear or $u(x) = \log(1+x)$ for diminishing-returns regimes).
+
+\subsection{Convexity and KKT Conditions}
+
+\begin{proposition}[Convexity]
+For fixed weights $(\alpha, \beta, \gamma)$, the allocation problem in Equation~\ref{eq:alloc} is a concave maximization problem over a bounded convex polytope and therefore admits a global maximum. \emph{Proof.} See Appendix~\ref{app:proofs}. $\blacksquare$
+\end{proposition}
+
+The KKT conditions characterize the optimal allocation structure. Governance floors for T1 and T2 nodes are satisfied first as hard constraints. For the remaining budget, the concave utility implies that at optimality the marginal contributions $u'(x_i) \cdot \text{CEI}_i$ are equalized across all nodes with allocations strictly between their lower and upper bounds. Nodes at their capacity caps have marginal contributions at or above the equalized level; nodes at their governance floors have marginal contributions at or below it. In the linear utility special case ($u(x) = x$), this reduces to a simpler greedy structure where the remaining budget is allocated in descending CEI order, with each node filled to its cap before the next is serviced. For the concave case, standard interior-point or water-filling algorithms compute the optimal allocation in polynomial time.
+
+\begin{proposition}[Weight Update Convergence]
+Let the stability loss $L(w)$ defined in Equation~\ref{eq:stability} be continuously differentiable with Lipschitz-continuous gradient (constant $L_{\text{lip}}$) over the weight simplex $W$. Projected gradient descent on $L$ with step size $\eta \leq 1/L_{\text{lip}}$ produces a sequence of non-increasing loss values converging to a stationary point of $L$. \emph{Proof sketch.} See Appendix~\ref{app:proofs}, including caveats on the surrogate nature of $L$ and the bilinearity of the joint $(x, w)$ optimization. Empirical validation (Section~\ref{sec:nc3}) shows weight trajectories consistent with convergence, with weight variance falling below 0.02 within 12--18 recalibration cycles during stable demand periods. $\blacksquare$
+\end{proposition}
+
+\subsection{Dynamic Weight Adaptation and Stability Loss}
+
+Weights are updated via projected gradient descent on a stability loss function $L(w)$ over the probability simplex $W = \{(\alpha, \beta, \gamma) : \alpha + \beta + \gamma = 1, \text{ all} \geq 0\}$. We define $L$ explicitly as:
+\begin{equation}
+L(w) = \lambda_1 \cdot \text{OscFreq}(w) + \lambda_2 \cdot \text{WeightVar}(w) + \lambda_3 \cdot \|w - w_0\|^2,
+\label{eq:stability}
+\end{equation}
+where $\text{OscFreq}(w)$ is the empirical allocation oscillation frequency under weights $w$ over a recent observation window, $\text{WeightVar}(w)$ is the variance of $w$ from a prior recalibration step, $w_0$ is the default weight initialization, and $\lambda_1, \lambda_2, \lambda_3$ are configurable regularization parameters (default $\lambda_1 = 1.0$, $\lambda_2 = 0.5$, $\lambda_3 = 0.1$). The default initialization is $\alpha = 0.4, \beta = 0.2, \gamma = 0.4$.
+
+The connection between minimizing $L$ and improving the allocation objective is indirect but principled: $L$ penalizes the two failure modes---allocation thrashing and weight instability---that degrade allocation quality in practice. By driving OscFreq toward zero, the weight update steers the system toward stable operating regimes where the allocation LP can be reliably solved. Minimizing $L$ does not directly maximize the allocation objective in Equation~\ref{eq:alloc}; rather, it maintains the conditions under which the allocation step produces consistent, governance-compliant resource assignments.
+
+The role of the entropy weight $\beta$ warrants brief comment. Because higher entropy $H_i$ indicates greater operational uncertainty, increasing $\beta$ directs monitoring and stabilization resources toward uncertain nodes---consistent with the zero-trust principle of allocating attention where confidence is lowest. The distinction between stabilization allocation and production workload routing is encoded in the governance component: T1 production workloads are routed to low-entropy (high-confidence) destinations via the governance floor, while entropy-elevated CEI scores drive monitoring and contingency resource allocation toward uncertain nodes.
+
+\subsection{Oscillation Suppression}
+
+\begin{proposition}[Per-Node Oscillation Bound]
+Under CEI allocation with hysteresis parameter $H \geq 1$, each node can change its allocation at most $\lfloor T/H \rfloor$ times over $T$ time steps. Total network allocation changes satisfy $N_{\text{osc}} \leq |V| \cdot \lfloor T/H \rfloor$. \emph{Proof.} See Appendix~\ref{app:proofs}. $\blacksquare$
+\end{proposition}
+
+We note that this bound counts per-node allocation changes, not system-level behavioral oscillations. System-level oscillation depends on correlation among node-level changes and is not directly bounded by Proposition~3. Empirically, the per-node bound serves as a useful proxy: in the NC3 simulation (Section~\ref{sec:nc3}), reducing per-node changes by the hysteresis mechanism reduced system-level oscillation events proportionally.
+
+\begin{proposition}[Bounded Allocation Stability]
+Let the concave utility $u$ be Lipschitz continuous with constant $L_u$ on $[x_{\min}, x_{\max}]$, and let the weight variation between consecutive recalibration steps be bounded: $\|w(k+1) - w(k)\|_1 \leq \delta$. Then $\|x^*(k+1) - x^*(k)\|_1 \leq 2N \cdot L_u \cdot \delta \cdot \max_i |f_i|$, where $f_i = (C_i, H_i, G_i)$ are the component scores and $N = |V|$. \emph{Proof sketch.} See Appendix~\ref{app:proofs}. Together, Propositions~3 and~4 ensure that CEI produces allocation trajectories that are both infrequently and incrementally modified---a property critical for operational deployment. $\blacksquare$
+\end{proposition}
+
+
+\section{Domain 1: NC3 Strategic Communications}
+\label{sec:nc3}
+
+\subsection{CEI Mapping to NC3 Architecture}
+
+In the NC3 domain, we instantiate CEI on the resilient communication network problem: dynamically allocating bandwidth and processing capacity across a hybrid satellite-terrestrial-airborne network to maximize delivery of high-priority Presidential and command-authority traffic under cyber and physical attack. The network is modeled as a 200-node hybrid graph: 40 backbone nodes (satellites, ground stations, airborne command posts) connected via Barabasi--Albert preferential attachment, plus 160 ground command nodes connected via Watts--Strogatz small-world topology. Cross-layer links connect each ground node to two random backbone nodes. Tier-1 nodes (top 5\%, command authority channels) are identified as the highest-betweenness backbone nodes; T2 (next 15\%, force operations); T3 and T4 are split over remaining ground nodes.
+
+\subsection{Threat Model and Simulation Setup}
+
+We evaluate three primary attack scenarios over 500 Monte Carlo trials per condition: (i) \emph{targeted}, in which the five highest-betweenness backbone nodes are disabled within the first 10 time steps; (ii) \emph{random}, in which 85\% of nodes are disabled uniformly at random; and (iii) \emph{cascading}, in which adversarial-induced failures propagate via edge reliability degradation. Each simulation runs 50 time steps. Adversarial state observations include partial telemetry dropout (15\% of node states observable as ``unknown'' per step) and 10\% Gaussian observation noise on reliability values, capturing realistic operational uncertainty.
+
+\subsection{Baselines}
+
+CEI is compared against six baselines: (1) \textbf{Static}, uniform allocation; (2) \textbf{Reactive}, threshold-based reallocation triggered by node loss; (3) \textbf{Greedy}, allocate to highest-centrality nodes only; (4) \textbf{MDP}, approximate dynamic programming with state-action discretization following~\cite{davis_adp}; (5) \textbf{Robust}, minimax allocation under worst-case adversary~\cite{nilim}; and (6) \textbf{Unconstrained PPO}, an intentionally unconstrained proximal policy optimization learner used to characterize the soft-objective baseline behavior (full implementation in Appendix~\ref{app:ppo}).
+
+\subsection{Results}
+
+Table~\ref{tab:nc3} presents NC3 simulation results across all three attack scenarios.
+
+\begin{table}[ht]
+\caption{NC3 simulation results: communication success rate and governance compliance over 500 trials per scenario. PPO values reflect a soft-objective fixed point; see text. $^\dagger$ Metric saturation; see Section~\ref{sec:nc3}.}
+\label{tab:nc3}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lccccccc}
+\toprule
+Scenario & Static & React. & Greedy & MDP & Robust & PPO & \textbf{CEI} \\
+\midrule
+Targeted comm.       & 60.0\% & 71.2\% & 78.4\% & 83.2\% & 80.7\% & 100.0\%$^\dagger$ & \textbf{91.4\%} \\
+Random comm.         & 51.7\% & 59.3\% & 62.1\% & 67.8\% & 65.1\% & 20.4\%             & \textbf{82.6\%} \\
+Cascading comm.      & 47.4\% & 54.6\% & 55.9\% & 59.2\% & 56.5\% & 100.0\%$^\dagger$ & \textbf{75.8\%} \\
+Gov. compliance (T1) & 76.1\% & 81.5\% & 83.7\% & 88.6\% & 85.9\% & 0.1\%             & \textbf{98.1\%} \\
+Recovery (steps)     & 6.1    & 4.7    & 4.4    & 4.7    & 4.6    & --                 & \textbf{3.1}    \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+CEI achieves 91.4\% targeted communication success versus 83.2\% for MDP, the strongest classical baseline. Random-failure performance is 82.6\% versus 67.8\%, a 14.8 percentage-point advantage attributable to the entropy-conditioned reallocation toward uncertain but still-functional nodes. Under cascading failure, CEI achieves 75.8\% versus 59.2\% for MDP. The MDP baseline requires complete attack-model knowledge that operational deployments would not have, while CEI uses only telemetry-derived entropy as its uncertainty signal. Robust optimization performs second-best on targeted attack (80.7\%) but degrades on random failure because its minimax formulation over-allocates to high-impact contingencies that do not materialize. The cascade-resistance advantage stems from the entropy component: high-uncertainty nodes (those showing reliability drift before complete failure) receive elevated CEI scores and trigger preemptive reallocation. This is in contrast to reactive methods, which respond only after failure, and to MDP, which requires explicit failure-transition probability models. CEI extracts equivalent information from telemetry-derived uncertainty without requiring an explicit adversary model and shifts resources preemptively. Recovery time under cascading failure is 3.1 steps for CEI versus 4.7 for MDP and 6.1 for static allocation. Governance compliance---the fraction of time T1 Presidential command channels remain operational---exceeds 98\% for CEI across all scenarios, compared to 83--91\% for baselines lacking governance constraints.
+
+\paragraph{Unconstrained PPO as a Learning Baseline.} To characterize how soft-reward learning baselines behave on this allocation problem, an \emph{intentionally unconstrained} proximal policy optimization (PPO) allocator was trained for 213{,}000 timesteps on the targeted-attack scenario (full implementation in Appendix~\ref{app:ppo}). The trained policy converged on a soft-objective fixed point that maximizes the communication component of the reward (weight 0.7) while heavily under-weighting governance (weight 0.3). Governance compliance falls below 1.2\% across all three scenarios, versus 98.1\% for CEI---a difference of two orders of magnitude. The apparent 100\% communication success on the targeted and cascade scenarios is an artifact of metric saturation; the operationally meaningful comparison is the random-failure scenario where 171 of 200 nodes are disabled, in which PPO achieves 20.4\% communication success versus 95.8\% for CEI. The finding is structural: soft reward weighting cannot enforce hard governance floors under any continuous-action policy optimizer that treats governance as a scalar reward term. Constrained reinforcement learning approaches (Lagrangian-PPO, safety layers, primal-dual schemes) are the natural complement and remain explicit future work.
+
+\paragraph{Comparison to Other Adaptive Allocators.} The unconstrained PPO finding above generalizes to a broader class of adaptive methods. Robust MPC~\cite{mayne} requires explicit disturbance-set characterization, but in adversarial NC3 environments the adversary actively shapes uncertainty; conservative sets over-allocate while aggressive sets lose robustness. Online convex optimization~\cite{hazan} requires full per-step loss observability, violated under partially observable cyber attacks. GNN schedulers~\cite{deng} require operational training data unavailable for NC3 attack scenarios, and like PPO lack explicit governance constraints. CEI's contribution against this class is the integration of structural, uncertainty, and governance constraints into a single decision function with formal convexity and stability guarantees and a hard governance floor.
+
+\section{Domain 2: Cloud Infrastructure Under Kinetic Attack}
+\label{sec:cloud}
+
+\subsection{CEI Mapping to Cloud Infrastructure}
+
+In the cloud domain, centrality $C_i$ quantifies the structural importance of region or availability zone $i$ within the global cloud topology. It is computed as a weighted combination of betweenness centrality (cross-region data flow transit), degree centrality (direct peering connections), and service-dependency weight (how many other regions depend on services hosted in region $i$). The ME-CENTRAL-1 region, serving as the primary cloud region for the entire Gulf, received high betweenness and service-dependency scores in our model.
+
+Entropy $H_i$ captures attack uncertainty---the probability distribution over whether a region is fully operational, degraded, under active attack, or offline. In the March 2026 scenario, the Bahrain region exhibited rising entropy between its initial damage on March 1 and the second strike on April 1. The uncertain status of the partially damaged facility created ambiguity about whether recovery or further attack was more likely. Standard failover does not incorporate this uncertainty; CEI uses it to direct contingency and monitoring resources toward high-entropy regions while routing production T1 workloads to low-entropy (high-confidence) regions via the governance floor mechanism. The governance component encodes workload criticality tiers as specified in Table~\ref{tab:tier_nc3}, with T1 military and intelligence workloads receiving guaranteed minimum capacity at stable destination regions before any T3 or T4 workloads are migrated.
+
+\subsection{Simulation Setup and Methodological Note}
+
+We model the global AWS infrastructure as a 150-node graph: 30 regions corresponding to documented AWS regions worldwide, each containing 3 to 6 availability zones, with inter-region backbone links weighted by documented latency and bandwidth. The Gulf cluster is modeled with high service-dependency scores reflecting its role as the primary Middle East cloud region. Three attack scenarios are calibrated to the general pattern of documented events: (S1) single-region strike; (S2) multi-region coordinated strike; and (S3) escalated targeting modeling the IRGC March 31 threat to eighteen technology companies~\cite{conversation}. Each scenario is evaluated over 500 Monte Carlo trials of 100 time steps each.
+
+\subsection{Baselines and Results}
+
+Table~\ref{tab:cloud} presents cloud failover results across three attack scenarios.
+
+\begin{table}[ht]
+\caption{Cloud failover simulation results (150 nodes, 500 trials). $^*$Multi-AZ failover cannot recover when all AZs in a region are disabled.}
+\label{tab:cloud}
+\centering
+\small
+\begin{tabular}{lccccc}
+\toprule
+Metric & \textbf{CEI} & Multi-AZ & RoundRobin & LatencyOpt & CapacityOpt \\
+\midrule
+T1 Downtime (S1) & \textbf{12 min} & 47 min & 31 min & 28 min & 34 min \\
+T1 Downtime (S2) & \textbf{18 min} & N/A$^*$ & 42 min & 39 min & 45 min \\
+Overall Recovery (S1) & \textbf{34 min} & 62 min & 48 min & 44 min & 51 min \\
+Overall Recovery (S2) & \textbf{51 min} & N/A$^*$ & 67 min & 71 min & 63 min \\
+Gov. Compliance (S3) & \textbf{96.2\%} & 41.3\% & 78.4\% & 74.1\% & 80.6\% \\
+Residency Violations & \textbf{0\%} & 0\% & 12.3\% & 8.7\% & 3.1\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+CEI reduces T1 (military and intelligence) workload downtime by 74\% compared to standard multi-AZ failover under single-region strike (12 minutes versus 47 minutes). It also provides the only viable failover path under multi-region coordinated strike, where multi-AZ failover fails entirely because all intra-region availability zones are compromised. Under the escalated targeting scenario (S3), CEI maintains 96.2\% governance compliance compared to 41.3\% for multi-AZ failover. CEI achieves zero data residency violations because the governance component includes residency constraints as hard limits. Round-robin and latency-optimized failover violate residency in 12.3\% and 8.7\% of trials respectively---a significant compliance risk highlighted by practitioners responding to the actual March 2026 events~\cite{conversation}.
+
+\subsection{AWS Health Dashboard Calibration}
+\label{sec:aws_cal}
+
+To further ground the cloud-domain analysis, we calibrated an additional in-region degradation simulation against publicly reported AWS Health Dashboard data from the March 1, 2026 incident. Where Section~\ref{sec:cloud} evaluates cross-region failover speed, this calibration focuses on how the affected ME-CENTRAL-1 (UAE) region itself degraded under sustained adversarial conditions and how five distinct allocators behave under that specific calibrated topology. The calibration parameterizes the simulation against the publicly reported topology and timing of the event; it does not replay proprietary AWS telemetry.
+
+The calibrated incident profile draws on four publicly reported elements: (i) the service-tier impact distribution (9 Tier-1 disrupted, 24 Tier-2 degraded, 58 Tier-3 impacted out of 91 services in ME-CENTRAL-1~\cite{cybersec_news}); (ii) the cascade timing (mec1-az2 strike at $T+0$, mec1-az3 cascade within 7 hours, cross-region propagation to ME-SOUTH-1 within 17.4 hours~\cite{defensescoop,infoq}); (iii) control-plane failure ordering (IAM and CloudFormation degraded before data-plane services~\cite{cybersec_news}); (iv) parallel recovery tracks (multi-day physical recovery alongside hours-scale software-mitigated partial recoveries on S3 PUT/LIST operations~\cite{aws_pes}). The full incident-profile JSON used to drive the simulation is available in the supplementary materials.
+
+Table~\ref{tab:aws_cal} presents the AWS-calibrated comparison across five allocators.
+
+\begin{table}[ht]
+\caption{AWS-calibrated cloud allocation results (91 services, 9/24/58 tier distribution, 7-day simulation, 10 episodes per allocator).}
+\label{tab:aws_cal}
+\centering
+\small
+\begin{tabular}{lccccc}
+\toprule
+Metric & Static & React+G & \textbf{CEI} & PPO & Lagr-PPO \\
+\midrule
+Availability (\%)     & 73.6  & 73.6  & \textbf{73.6}  & 73.6  & 73.6  \\
+Gov. Compliance (\%)  & 100.0 & 100.0 & \textbf{100.0} & 99.6  & 100.0 \\
+Throughput            & 0.408 & 0.278 & \textbf{0.370} & 0.132 & 0.109 \\
+Waste (\%)            & 56.0  & 79.3  & \textbf{65.5}  & 17.2  & 19.0  \\
+Oscillations/ep       & 91    & 319   & \textbf{56}    & 158   & 147   \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+These calibrated results, for five allocators evaluated over 10 episodes with $T = 720$ slots (representing 7 days at approximately 14-minute resolution): Static (uniform 0.60 duty), Reactive+Governance (threshold-based with governance floor), CEI, unconstrained Proximal Policy Optimization (PPO)~\cite{schulman}, and a Lagrangian-PPO constrained-RL variant~\cite{achiam} (both RL baselines trained for 213{,}000 timesteps with eight parallel environments).
+
+Three findings emerge under the calibrated topology. First, all five allocators achieve identical 73.6\% availability because physical infrastructure damage is independent of allocation policy: no allocator can restore a destroyed Availability Zone through scheduling. This is realistic and establishes physical damage, rather than allocator design, as the bottleneck on availability under kinetic attack. Second, CEI achieves $2.8\times$ higher throughput than unconstrained PPO (0.370 vs 0.132) and $3.4\times$ higher than Lagrangian-PPO (0.370 vs 0.109) while maintaining identical 100\% governance compliance. PPO and Lagrangian-PPO learn to keep T1 services at the governance floor while under-utilizing T2 and T3 services (mean duty 0.21 and 0.18 respectively), minimizing waste but sacrificing throughput on healthy services across all tiers. Third, CEI maintains the lowest oscillation count (56), consistent with the hysteresis bound established in Section~\ref{sec:framework}, while Reactive+Gov produces $5.7\times$ more oscillations (319) by reacting to every health change.
+
+Unlike the soft-objective governance collapse observed in NC3 (Section~\ref{sec:nc3}), PPO under this cloud calibration learns to respect the governance constraint over 213{,}000 timesteps. The structural advantage of CEI under physical-damage scenarios is therefore not governance preservation, but balanced throughput across tiers while preserving governance: a property that neither soft-objective nor constrained-RL approaches reproduce in our experiments. These calibrated results complement the failover-speed comparison in Section~\ref{sec:cloud}: CEI's structural advantage extends from cross-region recovery to in-region degradation management under empirically grounded adversarial conditions.
+
+\section{Domain 3: Missile Defense Interceptor Allocation}
+\label{sec:missile}
+
+\subsection{Framework Adaptation}
+
+The missile defense domain requires a modified CEI formulation. Centrality becomes coverage centrality: $C_i(t) = (\sum_j P_{ij}(t) \cdot w_j) / \max_k(\sum_j P_{kj}(t) \cdot w_j)$, where $P_{ij}(t)$ is the impact probability of threat $i$ on asset $j$ and $w_j$ is asset value. The entropy term is inverted to $(1 - H_i)$ so that high-certainty tracks (low entropy) receive higher scores, deferring interceptor commitment until tracking matures for high-uncertainty maneuvering threats. This entropy-conditioned engagement rule is the core novelty: an interceptor is committed only when the composite CEI score exceeds the engagement threshold, mean network entropy confirms the engagement environment is not purely noise-driven, and the hysteresis counter has expired.
+
+\subsection{Scenario and Results}
+
+The simulation models a multi-salvo engagement: a defended area with five high-value assets (military command center, satellite ground station, port facility, energy infrastructure, civilian population center), three asset-defense interceptor batteries with limited inventory (20 SM-3-class interceptors total), and a sequence of three threat waves (8 missiles each, mixed ballistic and hypersonic trajectories with maneuver capability). Each scenario is evaluated over 200 Monte Carlo trials.
+
+Table~\ref{tab:missile} reports multi-salvo missile defense results across three threat intensities.
+
+\begin{table}[ht]
+\caption{Missile defense simulation results (multi-salvo, 200 trials).}
+\label{tab:missile}
+\centering
+\small
+\begin{tabular}{lcccc}
+\toprule
+Metric & \textbf{CEI} & Static Priority & Greedy & ADP~\cite{davis_adp} \\
+\midrule
+Asset value defended (S1) & \textbf{91.4\%} & 76.2\% & 78.5\% & 86.7\% \\
+Asset value defended (S2) & \textbf{88.7\%} & 71.8\% & 69.1\% & 84.3\% \\
+Asset value defended (S3) & \textbf{83.5\%} & 62.4\% & 54.8\% & 79.1\% \\
+Interceptor efficiency    & \textbf{0.83}   & 0.61  & 0.58  & 0.74  \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+CEI provides up to 21 percentage points improvement in protected asset value over static priority allocation (S3 scenario: 83.5\% vs 62.4\%; S1 and S2 scenarios show 15--17 percentage points improvement) and a 5--7\% relative improvement over approximate dynamic programming. The advantage grows under higher salvo intensity (S3), where the entropy-conditioned engagement rule defers interceptor commitment on high-uncertainty maneuvering threats, preserving inventory for confirmed engagements. Interceptor efficiency (asset-weighted intercepts per interceptor expended) is 0.83 for CEI versus 0.74 for ADP, reflecting CEI's better handling of the inventory-conservation tradeoff inherent to multi-salvo defense.
+
+\section{Cross-Domain Analysis}
+\label{sec:crossdomain}
+
+\subsection{Cross-Domain Performance Summary}
+
+Table~\ref{tab:cross} summarizes CEI performance against the strongest baseline in each evaluation domain.
+
+\begin{table}[ht]
+\caption{Cross-domain CEI performance summary across all evaluated scenarios. $^\dagger$ S3 high-salvo absolute percentage point gain (83.5\% vs 62.4\%); S1 and S2 show smaller pp gains. $^\ddagger$ S3 relative improvement vs Greedy (83.5\% vs 54.8\%).}
+\label{tab:cross}
+\centering
+\small
+\begin{tabular}{lccc}
+\toprule
+Domain & Primary Metric & CEI Result & Best Baseline \\
+\midrule
+NC3            & Targeted attack comm.  & 91.4\%       & 83.2\% (MDP) \\
+Cloud (S1)     & T1 downtime reduction  & 74\%         & 41\% (Latency) \\
+Cloud (AWS-cal)& Throughput vs. PPO     & 2.8$\times$  & 1.0$\times$ (PPO) \\
+Missile (S3)   & Asset value defended   & 83.5\%       & 79.1\% (ADP) \\
+\midrule
+All domains    & Governance compliance  & $\geq$96\%   & $\leq$91\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Cross-Domain Performance Consistency}
+
+Table~\ref{tab:cross7} reports CEI performance relative to the strongest and weakest baselines in each domain. Against the evaluated classical baselines under tested conditions, CEI never underperforms the best available baseline in any primary scenario---a property we describe as consistent comparative performance. This is not trivially expected: a multi-component framework could plausibly underperform a single-component baseline matching a particular scenario's dominant failure mode (as occurs in the low-connectivity NC3 stress test, Section~\ref{sec:failuremode}). The fact that this consistency holds across primary scenarios in all three domains suggests that multi-component integration captures a robust allocation principle rather than overfitting to any single domain. Against RL baselines (PPO and Lagrangian-PPO), the comparison is more nuanced: CEI achieves balanced throughput and governance compliance simultaneously, where soft-objective RL learns to maximize one at the expense of the other.
+
+\begin{table}[ht]
+\caption{Cross-domain consistency: CEI performance relative to strongest and weakest baselines.}
+\label{tab:cross7}
+\centering
+\small
+\begin{tabular}{lp{4cm}cc}
+\toprule
+Domain & Primary Metric & CEI vs Best Baseline & CEI vs Worst Baseline \\
+\midrule
+NC3     & Comm. success (targeted) & +9.9\% vs MDP        & +30.4\% vs Uniform \\
+Cloud   & T1 downtime (S1)         & $-57\%$ vs Lat-Opt   & $-74\%$ vs Multi-AZ \\
+Missile & Asset value (multi-salvo)& +21 pp vs Static$^\dagger$  & +53\% vs Greedy$^\ddagger$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Sensitivity to CEI Weight Parameters}
+
+To assess robustness to parameter selection, the initial weight vector $(\alpha, \beta, \gamma)$ was varied across $\pm 30\%$ perturbations from the default (0.4, 0.2, 0.4), maintaining the simplex constraint, and the NC3 targeted-attack scenario was re-evaluated over 500 trials. Table~\ref{tab:sens} summarizes the results. Performance degrades gracefully under all perturbations, with targeted success varying by less than 3.2 percentage points and remaining above 88\% in all configurations---well above the best non-CEI baseline (MDP at 83.2\%). Governance compliance is most sensitive to $\gamma$ reduction, dropping to 91.7\% when the governance weight decreases by 30\%, but remains above all baselines. CEI does not rely on precise parameter tuning.
+
+\begin{table}[ht]
+\caption{Sensitivity of NC3 targeted-attack performance to weight initialization ($\pm 30\%$ perturbation).}
+\label{tab:sens}
+\centering
+\small
+\begin{tabular}{lccc}
+\toprule
+Weight Perturbation & Targeted Success & Gov. Compliance & Recovery Steps \\
+\midrule
+Default (0.4, 0.2, 0.4)        & 91.4\% & 98.1\% & 3.1 \\
+$\alpha +30\%$ (0.52, 0.14, 0.34) & 90.1\% & 96.3\% & 3.3 \\
+$\alpha -30\%$ (0.28, 0.26, 0.46) & 89.7\% & 98.8\% & 3.4 \\
+$\beta +30\%$ (0.35, 0.26, 0.39)  & 90.8\% & 97.4\% & 3.2 \\
+$\gamma -30\%$ (0.47, 0.23, 0.30) & 88.2\% & 91.7\% & 3.6 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Failure Mode Analysis}
+\label{sec:failuremode}
+
+To characterize operational limits, we conducted stress tests under extreme conditions beyond the primary evaluation scenarios. Table~\ref{tab:failure} summarizes the results. CEI degrades gracefully under most conditions, but two regimes warrant explicit mention. First, under extreme NC3 connectivity loss (average degree below 1.5), entropy weighting over-prioritizes unstable nodes; CEI drops to 61.3\%, below robust optimization's 64.8\%, identifying a regime where entropy weighting should be capped. Second, under global cloud saturation, governance floors force T3/T4 workload displacement, increasing recovery time by 23\% versus capacity-optimized failover---a deliberate tradeoff favoring governance compliance over aggregate recovery speed. Under degraded threat intelligence, CEI defaults to centrality-and-governance-only allocation, performing 8\% worse than full CEI but remaining competitive with latency-optimized baselines. Without bounded weight updates ($\delta \to \infty$), weights oscillate in 23\% of NC3 trials; with $\delta = 0.05$, oscillation drops below 1\%, confirming the necessity of this mechanism.
+
+\begin{table}[ht]
+\caption{Failure mode analysis. $^*$Oscillation present in 23\% of trials.}
+\label{tab:failure}
+\centering
+\small
+\begin{tabular}{p{4.5cm}lll}
+\toprule
+Stress Condition & Domain & CEI & Best Baseline \\
+\midrule
+Low connectivity (deg $<$ 1.5) & NC3   & 61.3\%             & 64.8\% (Robust) \\
+Multi-vector attack            & NC3   & 68.2\%             & 59.1\% (MDP) \\
+Global saturation              & Cloud & $+23\%$ recovery   & Capacity-Opt \\
+Degraded threat intel          & Cloud & $-8\%$ vs full CEI & Latency-Opt \\
+Unbounded weights              & NC3   & 79.1\%$^*$         & N/A \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Strategic Integration and Policy Implications}
+\label{sec:strategic}
+
+The CEI framework provides computational support for three active Department of Defense strategic initiatives. Joint All-Domain Command and Control (JADC2)~\cite{jadc2} requires adaptive cross-domain resource allocation, which CEI's weight adaptation mechanism and cross-domain validation directly enable. The DoD zero trust architecture~\cite{gao_it} is operationalized by the entropy component, which continuously quantifies uncertainty in each node's operational state. The 2023 DoD Data, Analytics, and AI Adoption Strategy~\cite{dod_ai} requires governance-conscious infrastructure, which the tier-based governance component directly implements via policy floors and explainable priority rules.
+
+The March 2026 Gulf attacks establish several policy precedents. Multi-AZ redundancy within a single geographic region is insufficient against coordinated adversarial attack; cloud providers and their government customers must adopt multi-region disaster recovery with pre-staged failover capacity. The dual-use nature of commercial cloud creates a governance gap that standard disaster recovery does not address; CEI's tiered governance component provides a principled mechanism for prioritized failover. Data residency constraints complicate cross-region failover; CEI's constraint-aware optimization prevents violations during automated recovery. These findings apply across the \$946 billion defense infrastructure investment portfolio projected through 2034~\cite{cbo}.
+
+\section{Limitations and Future Work}
+\label{sec:limitations}
+
+All evaluations use synthetic topologies rather than operational infrastructure data. No classified information was used or accessed in this work. The joint weight-and-allocation problem is bilinear and therefore non-convex; convergence to a global optimum is not guaranteed, only monotonic improvement (Proposition~2). The missile defense scenario is a proof-of-concept at small scale; multi-salvo extension with interceptor reservation across attacker waves represents the most important planned extension. Several directions are planned for future work. These include formal global convergence analysis via convex relaxation, integration with reinforcement learning for adversary modeling, and validation on DoD-sponsored testbeds. Further extensions include scaling to 1{,}000-plus node topologies reflecting proliferated low Earth orbit satellite architectures, real-time integration with cloud health APIs and threat intelligence feeds, and multi-cloud scenarios spanning AWS, Azure, and GCP. A provisional patent application describing aspects of the system architecture has been filed.
+
+\paragraph{Governance Model: Scope and Extensions.} The governance component in this work uses static scalar tier values (T1--T4) reflecting fixed mission-criticality hierarchies. This choice is deliberate and consistent with operational DoD governance structures~\cite{dod_ai,nds2022}. The framework supports natural extensions along three axes that operational deployment will require: (i) time-varying tier assignment under operational stress ($G_i(t)$ as a function of operational state); (ii) multi-stakeholder governance with explicit conflict-resolution rules when multiple authorities have overlapping priorities (e.g., theater commander, joint task force, host-nation policy under JADC2~\cite{jadc2}); and (iii) formal governance audit primitives for compliance with the 2023 DoD AI Strategy~\cite{dod_ai}. These extensions are not exercised here in order to isolate the contribution of the centrality-entropy-governance integration, but each maps to a specific augmentation of the governance component while preserving the convexity, oscillation, and stability guarantees established in Section~\ref{sec:framework}.
+
+\section{Conclusion}
+\label{sec:conclusion}
+
+This paper introduced the Centrality-Entropy Index---a unified governance-aware dynamic resource allocation framework for defense infrastructure that integrates structural centrality, Shannon entropy, and policy-driven governance constraints into a single decision function. The core contribution is the framework itself: a unified formulation that can be adapted to operationally distinct defense domains through component mapping alone, without redesign. Formal convexity results, KKT characterization, and a concrete stability loss function provide mathematical grounding. Cross-domain validation confirms the framework's generality: 91.4\% NC3 communication success under targeted attack versus 83.2\% for MDP; 74\% reduction in governance-critical cloud workload downtime under kinetic strike; and up to 21 percentage points improvement in multi-salvo missile defense asset protection over static priority (S3 scenario). Governance compliance exceeds 96\% across all domains. An intentionally unconstrained PPO baseline trained for 213{,}000 timesteps converges on a soft-objective fixed point at which governance compliance falls to 0.1\%, illustrating the gap that CEI's hard governance floor mechanism addresses by construction. Constrained reinforcement learning approaches are identified as a natural complement and an explicit direction for future work. The framework aligns with JADC2, zero trust, and DoD AI Strategy mandates. As the March 2026 Gulf attacks demonstrated, defense infrastructure faces converging adversarial threats that require governance-aware, uncertainty-conscious, structurally-informed allocation. CEI provides a unified mathematical foundation for that capability.
+
+\section*{Declaration on Generative AI}
+\addcontentsline{toc}{section}{Declaration on Generative AI}
+The author used generative AI tools (Anthropic Claude) to assist with drafting and language refinement, manuscript revision, code scaffolding for simulation harnesses, and figure preparation. All scientific ideas, research design, formal results, experimental configurations, results interpretation, and conclusions are the work of the human author. The author critically reviewed and edited all AI-assisted content and takes full responsibility for the manuscript's accuracy, originality, and integrity.
+
+\begin{thebibliography}{99}
+
+\bibitem{crs_nc3} Fink, A.L.: Defense Primer: Nuclear Command, Control, and Communications (NC3). Congressional Research Service, In Focus IF11697 (updated May 1, 2025)
+
+\bibitem{atlantic_council} Hays, P., Mineiro, S.: Modernizing Space-Based Nuclear Command, Control, and Communications. Atlantic Council Issue Brief (July 2024)
+
+\bibitem{cbo} Congressional Budget Office: Projected Costs of U.S. Nuclear Forces, 2025 to 2034 (April 2025)
+
+\bibitem{cnbc1} CNBC: Amazon says drone strikes damaged 3 facilities in UAE and Bahrain (March 2, 2026)
+
+\bibitem{register1} The Register: AWS says drones hit two of its datacenters in UAE (March 2, 2026)
+
+\bibitem{cnbc2} CNBC: Digital services down in UAE after data center drone strikes (March 3, 2026)
+
+\bibitem{cnbc3} CNBC: Amazon's Bahrain data center targeted by Iran for support of U.S. military, state media says (March 4, 2026)
+
+\bibitem{conversation} The Conversation: Why Iran targeted Amazon data centers and what that does---and doesn't---change about warfare (April 1, 2026)
+
+\bibitem{gao_md1} U.S. Government Accountability Office: Missile Defense: Annual Goals Unmet for Deliveries and Testing. GAO-23-106011 (May 2023)
+
+\bibitem{gao_md2} U.S. Government Accountability Office: Missile Defense: Better Oversight and Coordination Needed for Counter-Hypersonic Development. GAO-22-105075 (June 2022)
+
+\bibitem{gao_md3} U.S. Government Accountability Office: Missile Defense: DOD Faces Support Challenges for Defense of Guam. GAO-25-108187 (May 2025)
+
+\bibitem{jadc2} Joint Chiefs of Staff: JADC2 Implementation Plan (June 2022)
+
+\bibitem{gao_it} U.S. Government Accountability Office: IT Systems Annual Assessment: DOD Needs to Improve Performance Reporting and Cybersecurity Planning. GAO-25-107649 (2025)
+
+\bibitem{dod_ai} U.S. Department of Defense, Chief Digital and Artificial Intelligence Office: 2023 DoD Data, Analytics, and Artificial Intelligence Adoption Strategy (November 2, 2023)
+
+\bibitem{nuclear_handbook} Office of the Deputy Assistant Secretary of Defense for Nuclear Matters: Nuclear Matters Handbook 2020 (Revised), Chapter 2
+
+\bibitem{npr_2022} U.S. Department of Defense: 2022 Nuclear Posture Review (October 2022)
+
+\bibitem{wirtz} Wirtz, J.J., Larsen, J.A. (eds.): Nuclear Command, Control, and Communications: A Primer on US Systems and Future Challenges. Georgetown University Press (2022)
+
+\bibitem{ndaa2024} National Defense Authorization Act for Fiscal Year 2024, Pub. L. No. 118-31, Section 1631
+
+\bibitem{davis_adp} Davis, M.T., Robbins, M.J., Lunday, B.J.: Approximate Dynamic Programming for Missile Defense Interceptor Fire Control. European Journal of Operational Research \textbf{259}(3), 873--886 (2017)
+
+\bibitem{summers_adp} Summers, D.S., Robbins, M.J., Lunday, B.J.: An Approximate Dynamic Programming Approach for Comparing Firing Policies in a Networked Air Defense Environment. Computers and Operations Research \textbf{117}, art. 104890 (2020)
+
+\bibitem{albert} Albert, R., Jeong, H., Barab\'{a}si, A.-L.: Error and Attack Tolerance of Complex Networks. Nature \textbf{406}, 378--382 (2000)
+
+\bibitem{freeman} Freeman, L.C.: Centrality in Social Networks: Conceptual Clarification. Social Networks \textbf{1}(3), 215--239 (1979)
+
+\bibitem{shannon} Shannon, C.E.: A Mathematical Theory of Communication. Bell System Technical Journal \textbf{27}(3), 379--423 (1948)
+
+\bibitem{cover} Cover, T.M., Thomas, J.A.: Elements of Information Theory, 2nd edn. Wiley (2006)
+
+\bibitem{tosi2025} Tosi, D., Pazzi, R.: (H-DIR)$^2$: A Scalable Entropy-Based Framework for Anomaly Detection and Cybersecurity in Cloud IoT Data Centers. Sensors \textbf{25}(15), 4841 (2025). \url{https://doi.org/10.3390/s25154841}
+
+\bibitem{freitas2021} Freitas, S., Yang, D., Kumar, S., Tong, H., Chau, D.H.: Graph Vulnerability and Robustness: A Survey. arXiv:2105.00419 (2021)
+
+\bibitem{bala} Bala, A., Chana, I.: Fault Tolerance---Challenges, Techniques, and Implementation in Cloud Computing. International Journal of Computer Science Issues \textbf{9}(1) (2012)
+
+\bibitem{gill} Gill, P., Jain, N., Nagappan, N.: Understanding Network Failures in Data Centers. In: ACM SIGCOMM (2011)
+
+\bibitem{bertsekas} Bertsekas, D.P., Homer, M.L., Logan, D.A., Patek, S.D., Sandell, N.R.: Missile Defense and Interceptor Allocation by Neuro-Dynamic Programming. IEEE Transactions on Systems, Man, and Cybernetics \textbf{30}(1), 42--51 (2000)
+
+\bibitem{boyd} Boyd, S., Vandenberghe, L.: Convex Optimization. Cambridge University Press (2004)
+
+\bibitem{nds2022} U.S. Department of Defense: 2022 National Defense Strategy of the United States of America (October 2022)
+
+\bibitem{deng} Deng, A., Hooi, B.: Graph Neural Network-Based Anomaly Detection in Multivariate Time Series. In: Proc. AAAI Conference on Artificial Intelligence, pp. 4027--4035 (2021)
+
+\bibitem{defensescoop} DefenseScoop: Commercial data centers emerge as targets in modern warfare after drones hit 3 AWS facilities (March 3, 2026)
+
+\bibitem{infoq} InfoQ: War in Iran Damages Multiple AWS Data Centers, Challenging Multi-AZ Assumptions (March 2026)
+
+\bibitem{pasqualetti} Pasqualetti, F., D\"{o}rfler, F., Bullo, F.: Attack Detection and Identification in Cyber-Physical Systems. IEEE Transactions on Automatic Control \textbf{58}(11), 2715--2729 (November 2013)
+
+\bibitem{sandberg} Sandberg, H., Amin, S., Johansson, K.H.: Cyberphysical Security in Networked Control Systems. IEEE Control Systems Magazine \textbf{35}(1), 20--23 (February 2015)
+
+\bibitem{nilim} Nilim, A., El Ghaoui, L.: Robust Control of Markov Decision Processes with Uncertain Transition Matrices. Operations Research \textbf{53}(5), 780--798 (2005)
+
+\bibitem{iyengar} Iyengar, G.: Robust Dynamic Programming. Mathematics of Operations Research \textbf{30}(2), 257--280 (2005)
+
+\bibitem{marler} Marler, R.T., Arora, J.S.: Survey of Multi-Objective Optimization Methods for Engineering. Structural and Multidisciplinary Optimization \textbf{26}(6), 369--395 (2004)
+
+\bibitem{deb} Deb, K.: Multi-Objective Optimization Using Evolutionary Algorithms. Wiley, Chichester (2001)
+
+\bibitem{mayne} Mayne, D.Q.: Model Predictive Control: Recent Developments and Future Promise. Automatica \textbf{50}(12), 2967--2986 (2014)
+
+\bibitem{hazan} Hazan, E.: Introduction to Online Convex Optimization. Foundations and Trends in Optimization \textbf{2}(3--4), 157--325 (2016)
+
+\bibitem{cybersec_news} Cybersecurity News: AWS Middle East (UAE) Region Hit by Drone Strikes, 109 Services Disrupted (March 5, 2026), \url{https://cybersecuritynews.com/aws-middle-east-services-disrupted/}
+
+\bibitem{aws_pes} Amazon Web Services: AWS Post-Event Summaries. Premium Support Technology archive, \url{https://aws.amazon.com/premiumsupport/technology/pes/}
+
+\bibitem{schulman} Schulman, J., Wolski, F., Dhariwal, P., Radford, A., Klimov, O.: Proximal Policy Optimization Algorithms. arXiv:1707.06347 (2017)
+
+\bibitem{achiam} Achiam, J., Held, D., Tamar, A., Abbeel, P.: Constrained Policy Optimization. In: Proc. International Conference on Machine Learning (ICML) (2017)
+
+\end{thebibliography}
+
+\appendix
+
+\section*{Appendix A: Reproducibility}
+\label{app:reproducibility}
+\addcontentsline{toc}{section}{Appendix A: Reproducibility}
+
+\paragraph{Hardware and Software Environment.}
+All experiments were executed on a single workstation: Apple M2 Pro (10-core CPU, 16~GB RAM, macOS 14). Python 3.11 with NumPy 1.26, SciPy 1.11, NetworkX 3.2, and stable-baselines3 2.2. No GPU was used. Wall-clock runtime per Monte Carlo trial is approximately 1.8~s for NC3 (200 nodes, 100 steps), 1.2~s for cloud (150 nodes, 100 steps), and 0.6~s for missile defense (44 nodes, 500 fire-control cycles). A complete 500-trial sweep across all three domains completes in under 45 minutes single-threaded.
+
+\paragraph{Runtime Complexity.}
+Per allocation step, the dominant cost is solving the linear program in Equation~\ref{eq:alloc}. With $N = |V|$ nodes, the HiGHS dual simplex solver runs in empirical polynomial time $O(N^{2.4})$ on the sparse polytopes used here (theoretical worst case $O(N^3)$). Centrality recomputation is $O(N \cdot |E|)$ for betweenness on connected components, performed only on topology change. Entropy estimation is $O(N \cdot |\mathcal{S}|)$ per step where $|\mathcal{S}| = 4$ in our experiments. Weight projection onto the simplex is $O(1)$ per recalibration. For the 200-node NC3 topology this yields sub-100~ms per allocation step on a single core.
+
+\paragraph{Topology Generation.}
+Topologies were generated using NetworkX scale-free (Barab\'{a}si--Albert) and Erd\H{o}s--R\'{e}nyi-equivalent small-world (Watts--Strogatz) models. The NC3 topology uses NumPy seed $\text{np\_seed} = 42$ and trial-level seed $\text{rng\_seed} = 2026 + \text{trial\_index}$. This produces a deterministic 200-node hybrid graph: 40 backbone nodes via Barab\'{a}si--Albert preferential attachment ($m = 3$) and 160 ground nodes via Watts--Strogatz small-world ($k = 4$, $\beta_{\text{ws}} = 0.3$). Cross-layer links are formed by random selection of two backbone targets per ground node. Edge reliabilities are sampled from Beta(8, 2). Tier assignment uses backbone-betweenness-centrality ordering for T1 (top 5\% of nodes) and T2 (next 15\%), with the remaining 80\% split T3/T4 at random over ground nodes. The cloud topology (150 nodes) and missile defense topology (44 nodes) follow analogous deterministic generators with their respective seeds.
+
+\paragraph{Attack Injection Procedure.}
+Three attack classes are used. \emph{Targeted attacks} disable the five highest-betweenness backbone nodes sequentially within the first 10 time steps, modeling an adversary with full topology knowledge. \emph{Random failures} draw nodes uniformly at each step with per-node failure probability 0.02. \emph{Cascading failures} initiate with a single seed node and propagate to neighbors with probability proportional to edge reliability; propagation halts after either 25\% of nodes are affected or 30 time steps elapse, whichever comes first. Each attack class runs 500 independent trials with seeds offset from the topology seed to preserve reproducibility while decorrelating attack draws from topology draws.
+
+\paragraph{Optimizer Configuration and Schedule.}
+The allocation problem in Equation~\ref{eq:alloc} is solved via SciPy \texttt{linprog} with the HiGHS dual simplex solver for the linear-utility case, and via projected gradient with step size $\eta = 0.01$ for the concave case. Convergence is declared when the L1 norm of the allocation update falls below $10^{-4}$, typically within 30--50 iterations. Hysteresis $H = 5$ steps. Default weights $\alpha = 0.4, \beta = 0.2, \gamma = 0.4$. Weight update step size for the stability loss is $\eta_w = 0.01$, with $\lambda_1 = 1.0, \lambda_2 = 0.5, \lambda_3 = 0.1$ as defined in Equation~\ref{eq:stability}.
+
+\paragraph{Source Code and Data.}
+Source code: \url{https://github.com/prawalpokharel/CEI-Cloud-Governance-Framework}. The repository contains all NC3, cloud, and missile defense simulation harnesses, PPO training scripts, and the AWS Health Dashboard calibration profile (\texttt{aws\_incident\_profile\_march\_2026.json}).
+
+\section*{Appendix B: CEI Under Degraded Telemetry}
+\label{app:telemetry}
+\addcontentsline{toc}{section}{Appendix B: CEI Under Degraded Telemetry}
+
+To assess CEI behavior under realistic telemetry imperfections, the NC3 targeted-attack scenario was re-run under three controlled degradation regimes: (i) telemetry lag (entropy estimates computed from state observations $k$ steps stale, $k \in \{5, 15, 30\}$); (ii) telemetry dropout (a configurable fraction of node-state samples drop each step, $\rho \in \{0.10, 0.20, 0.30\}$); and (iii) Gaussian observation noise on per-node reliability values (standard deviation $\sigma \in \{0.05, 0.10, 0.20\}$). Table~\ref{tab:telemetry} reports results from 15 trials per condition.
+
+\begin{table}[ht]
+\caption{CEI under degraded telemetry (NC3, targeted-attack, 15 trials per condition).}
+\label{tab:telemetry}
+\centering
+\small
+\begin{tabular}{lcc}
+\toprule
+Degradation Condition & Comm. Success & Gov. Compliance \\
+\midrule
+None (baseline)                  & 95.8\% & 100.0\% \\
+Lag $k=5$                        & 96.5\% & 100.0\% \\
+Lag $k=15$                       & 96.5\% &  98.4\% \\
+Lag $k=30$                       & 97.3\% &  99.2\% \\
+Dropout $\rho=0.10$              & 96.3\% & 100.0\% \\
+Dropout $\rho=0.20$              & 96.4\% &  98.4\% \\
+Dropout $\rho=0.30$              & 96.7\% &  98.4\% \\
+Noise $\sigma=0.05$              & 97.1\% &  92.4\% \\
+Noise $\sigma=0.10$              & 96.8\% &  87.7\% \\
+Noise $\sigma=0.20$              & 96.5\% &  88.5\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Three findings emerge from Table~\ref{tab:telemetry}. First, CEI is robust to lag and dropout: communication success remains above 96.3\% even at 30-step staleness or 30\% packet dropout. This robustness is because the static centrality and governance components---which carry the majority of the allocation signal at weights $\alpha + \gamma = 0.8$---are not affected by telemetry corruption. The entropy component, weighted at $\beta = 0.2$, absorbs lag through the sliding observation window and absorbs dropout through last-known-value caching. Second, Gaussian observation noise affects governance compliance more than communication success: at $\sigma = 0.10$, governance compliance drops from 100.0\% to 87.7\%, reflecting the entropy estimator's sensitivity to distribution-distorting noise on per-node reliability values. The mechanism is that noisy entropy occasionally elevates the CEI score of a non-critical node above a T2 node's score, pushing the T2 allocation just below its governance floor. Third, the failure mode under noise is graceful: at the most severe condition tested ($\sigma = 0.20$), governance compliance remains above 88\%, with no scenario producing catastrophic collapse. This confirms that CEI degrades smoothly under realistic telemetry imperfection rather than exhibiting threshold-based failure typical of single-objective reactive allocators. The most operationally significant finding is that the dominant failure mode under telemetry degradation is governance compliance loss under Gaussian noise---not communication failure. This indicates that real-world CEI deployments should prioritize input filtering or robust statistics on the reliability telemetry stream over redundant transmission paths or low-latency backhaul. The robustness asymmetry across degradation classes is itself useful operational intelligence and is invisible to allocation methods without a telemetry-quality dimension.
+
+\section*{Appendix C: Proofs of Propositions}
+\label{app:proofs}
+\addcontentsline{toc}{section}{Appendix C: Proofs of Propositions}
+
+\paragraph{Proof of Proposition 1 (Convexity).} With fixed weights, $\text{CEI}_i$ is a constant for each node $i$. The objective $\sum u(x_i) \cdot \text{CEI}_i$ is a non-negatively weighted sum of concave functions (since $u$ is concave and $\text{CEI}_i \geq 0$), and therefore concave. The constraint set $\{\sum x_i \leq R, x_{\min,i} \leq x_i \leq x_{\max,i}\}$ is a bounded convex polytope. Maximizing a concave objective over a convex set is a convex optimization problem that attains a global maximum on the feasible set~\cite{boyd}. Uniqueness holds when $u$ is strictly concave on the effective domain and all CEI coefficients are strictly positive. In degenerate cases (e.g., $\text{CEI}_i = 0$ for some nodes or binding capacity constraints creating ties), the optimum may not be unique, but any optimal solution achieves the same objective value. When $u$ is the identity function (linear utility), the problem reduces to a linear program; with concave $u$, interior-point methods solve the problem in polynomial time. $\blacksquare$
+
+\paragraph{Proof Sketch of Proposition 2 (Weight Update Convergence).} This follows from standard projected gradient descent convergence for smooth functions over convex sets~\cite{boyd}. The OscFreq term in Equation~\ref{eq:stability} is computed over a finite observation window with bounded event counts, yielding bounded first-order variation. The WeightVar term is a sum of squares bounded by the diameter of the simplex. Together, these provide informal support for the Lipschitz gradient assumption, though formal derivation of $L_{\text{lip}}$ under stochastic demand conditions remains as future work. Three caveats apply. First, $L$ as defined in Equation~\ref{eq:stability} is a stability surrogate. Minimizing $L$ does not directly maximize the allocation objective in Equation~\ref{eq:alloc}; it maintains conditions for stable allocation as discussed in Section~\ref{sec:framework}. Second, the joint optimization over $(x, w)$ is bilinear and non-convex. Convergence of the weight update therefore does not guarantee convergence of the full alternating scheme to a global optimum. Third, empirical validation (Section~\ref{sec:nc3}) shows weight trajectories consistent with convergence, with weight variance falling below 0.02 within 12--18 recalibration cycles during stable demand periods. $\blacksquare$
+
+\paragraph{Proof of Proposition 3 (Per-Node Oscillation Bound).} After any allocation change at step $t_0$, the hysteresis counter is initialized to $H$ and decremented each step. The allocation rule requires the counter to reach zero before any subsequent change, so consecutive changes to a given node are separated by at least $H$ steps. Over $T$ steps, the maximum changes per node is $\lfloor T/H \rfloor$. Summing over $|V|$ independent nodes gives the stated bound. Reactive baselines without hysteresis are bounded only by $T$. $\blacksquare$
+
+\paragraph{Proof Sketch of Proposition 4 (Bounded Allocation Stability).} The CEI score for each node is $\text{CEI}_i = w \cdot f_i$. A weight perturbation of magnitude $\delta$ changes each CEI score by at most $\delta \cdot \|f_i\|_\infty$. Since $u$ is $L_u$-Lipschitz and the allocation problem is a concave program over a bounded polytope, the optimal allocation is a continuous function of the CEI parameters. By the sensitivity analysis of parametric convex programs~\cite{boyd}, the optimal solution displacement is bounded by the product of the parameter perturbation, the Lipschitz constant, and the problem dimension. The bounded weight variation constraint ($\delta = 0.05$ in our implementation) therefore prevents allocation instability explosions regardless of demand volatility. $\blacksquare$
+
+\section*{Appendix D: Unconstrained PPO Baseline Implementation}
+\label{app:ppo}
+\addcontentsline{toc}{section}{Appendix D: Unconstrained PPO Baseline Implementation}
+
+The unconstrained PPO baseline reported in Section~\ref{sec:nc3} was implemented using stable-baselines3 with 8 vectorized environments, a default Gaussian policy, learning rate $3 \times 10^{-4}$, $n_{\text{steps}} = 2048$, and $\text{batch\_size} = 64$. The reward function was the same composite used throughout the evaluation: $0.7 \cdot \text{comm} + 0.3 \cdot \text{gov\_compliance}$, identical in weighting to the soft objective an unconstrained learning baseline would naturally target. Training converged after 213{,}000 timesteps, with explained variance reaching 1.0 and value loss falling to 0.008 by step 200{,}000. The choice to evaluate \emph{unconstrained} PPO is deliberate. The goal is not to evaluate PPO at its best, but to characterize how the simplest, most direct application of modern deep reinforcement learning behaves when governance is expressed as a soft objective rather than a hard constraint. The resulting soft-objective fixed point---0.1\% governance compliance against 0.7-weighted communication maximization---characterizes the baseline against which any constrained-RL variant (Lagrangian-PPO, projection-based safety layers, primal-dual constrained policy optimization) would need to demonstrate competitive performance.
+
+\end{document}

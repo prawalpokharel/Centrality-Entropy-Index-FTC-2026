@@ -1,0 +1,12 @@
+AWS Health Dashboard Calibrated Cloud Simulation - Summary
+======================================================================
+Incident: March 2026 Iranian Drone Strikes on AWS Gulf Data Centers
+Topology: 91 services, 9/24/58 tier distribution
+
+Allocator            Avail %     Gov %      Tput   Waste %    Osc/ep
+----------------------------------------------------------------------
+static                  73.6     100.0    0.4079      56.0      91.0
+reactive_gov            73.6     100.0    0.2778      79.3     319.4
+cei                     73.6     100.0    0.3701      65.5      56.0
+ppo                     73.6      99.6    0.1320      17.2     158.2
+lagrangian_ppo          73.6     100.0    0.1093      19.0     147.3

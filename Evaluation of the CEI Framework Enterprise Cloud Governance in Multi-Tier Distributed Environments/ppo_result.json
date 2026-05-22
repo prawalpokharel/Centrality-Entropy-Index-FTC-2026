@@ -1,0 +1,14 @@
+{
+  "name": "ppo",
+  "monthly_cost_usd": 1566.5970458984375,
+  "cost_reduction_pct": 92.87910433682528,
+  "oscillation_events": 62,
+  "oscillation_reduction_pct": 0.0,
+  "utilization_efficiency_pct": 99.99274666494715,
+  "governance_violations": 21600,
+  "governance_compliance_pct": 0.0,
+  "waste_pct": 0.007253335052848087,
+  "training_seconds": 33.9535698890686,
+  "timesteps": 30000,
+  "final_lambda": 0.0
+}

@@ -1,0 +1,58 @@
+[
+  {
+    "N": 1000,
+    "E": 5964,
+    "mean_degree": 11.93,
+    "graph_build_s": 0.009,
+    "betweenness_s": 0.097,
+    "betweenness_k_samples": 49,
+    "pagerank_s": 0.007,
+    "centrality_total_s": 0.104,
+    "per_step_entropy_ms": 0.2,
+    "per_step_cei_score_ms": 0.44,
+    "per_step_total_ms": 0.64,
+    "sparse_adj_memory_mb": 0.19
+  },
+  {
+    "N": 10000,
+    "E": 89919,
+    "mean_degree": 17.98,
+    "graph_build_s": 0.157,
+    "betweenness_s": 3.215,
+    "betweenness_k_samples": 66,
+    "pagerank_s": 0.136,
+    "centrality_total_s": 3.351,
+    "per_step_entropy_ms": 1.47,
+    "per_step_cei_score_ms": 3.49,
+    "per_step_total_ms": 4.96,
+    "sparse_adj_memory_mb": 2.82
+  },
+  {
+    "N": 50000,
+    "E": 499900,
+    "mean_degree": 20.0,
+    "graph_build_s": 1.126,
+    "betweenness_s": 40.041,
+    "betweenness_k_samples": 78,
+    "pagerank_s": 0.888,
+    "centrality_total_s": 40.929,
+    "per_step_entropy_ms": 6.69,
+    "per_step_cei_score_ms": 18.47,
+    "per_step_total_ms": 25.16,
+    "sparse_adj_memory_mb": 15.64
+  },
+  {
+    "N": 100000,
+    "E": 1099879,
+    "mean_degree": 22.0,
+    "graph_build_s": 2.742,
+    "betweenness_s": 121.683,
+    "betweenness_k_samples": 83,
+    "pagerank_s": 1.96,
+    "centrality_total_s": 123.643,
+    "per_step_entropy_ms": 14.22,
+    "per_step_cei_score_ms": 36.94,
+    "per_step_total_ms": 51.16,
+    "sparse_adj_memory_mb": 34.33
+  }
+]

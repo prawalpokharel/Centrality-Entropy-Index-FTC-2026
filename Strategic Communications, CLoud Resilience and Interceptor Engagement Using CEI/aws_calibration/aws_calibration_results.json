@@ -1,0 +1,90 @@
+{
+  "calibration_profile": {
+    "incident_id": "AWS-ME-MAR-2026",
+    "incident_name": "March 2026 Iranian Drone Strikes on AWS Gulf Data Centers",
+    "event_start_utc": "2026-03-01T12:30:00Z",
+    "topology": {
+      "n_services": 91,
+      "tier1": 9,
+      "tier2": 24,
+      "tier3": 58,
+      "n_azs": 3
+    },
+    "timeline": {
+      "intra_region_cascade_hours": 7.0,
+      "cross_region_cascade_hours": 17.43,
+      "software_recovery_hours": 51.73,
+      "physical_recovery_hours_estimate": 168.0
+    }
+  },
+  "simulation_config": {
+    "n_services": 91,
+    "n_tier1": 9,
+    "n_tier2": 24,
+    "n_tier3": 58,
+    "n_azs": 3,
+    "t_slots": 720,
+    "cascade_az_to_az_slot": 30,
+    "cascade_region_to_region_slot": 75,
+    "software_recovery_slot": 220,
+    "physical_recovery_slot": 720,
+    "gov_floor": 0.6,
+    "theta_health": 0.4,
+    "hysteresis_h": 18,
+    "action_change_threshold": 0.1,
+    "seed": 42
+  },
+  "allocator_results": {
+    "static": {
+      "availability_pct": 73.61,
+      "governance_compliance_pct": 100.0,
+      "throughput": 0.4079,
+      "waste_pct": 55.99,
+      "oscillations_per_episode": 91.0,
+      "mean_duty_cycle": 0.6,
+      "episodes": 10
+    },
+    "reactive_gov": {
+      "availability_pct": 73.61,
+      "governance_compliance_pct": 100.0,
+      "throughput": 0.2778,
+      "waste_pct": 79.28,
+      "oscillations_per_episode": 319.4,
+      "mean_duty_cycle": 0.465,
+      "episodes": 10
+    },
+    "cei": {
+      "availability_pct": 73.61,
+      "governance_compliance_pct": 100.0,
+      "throughput": 0.3701,
+      "waste_pct": 65.45,
+      "oscillations_per_episode": 56.0,
+      "mean_duty_cycle": 0.562,
+      "episodes": 10
+    },
+    "ppo": {
+      "availability_pct": 73.61,
+      "governance_compliance_pct": 99.61,
+      "throughput": 0.132,
+      "waste_pct": 17.16,
+      "oscillations_per_episode": 158.2,
+      "mean_duty_cycle": 0.21,
+      "episodes": 10,
+      "training_seconds": 109.8,
+      "timesteps": 213000
+    },
+    "lagrangian_ppo": {
+      "availability_pct": 73.61,
+      "governance_compliance_pct": 100.0,
+      "throughput": 0.1093,
+      "waste_pct": 18.99,
+      "oscillations_per_episode": 147.3,
+      "mean_duty_cycle": 0.176,
+      "episodes": 10,
+      "training_seconds": 111.9,
+      "timesteps": 213000,
+      "lambda_final": 1.0777
+    }
+  },
+  "honesty_note": "This profile parameterizes simulation against the publicly reported topology and timing of a real event. It does not replay proprietary telemetry."
+}
